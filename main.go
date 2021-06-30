@@ -3,9 +3,10 @@ package main
 import (
 	"fmt"
 	"log"
-	"strings"
-	"path/filepath"
 	"os"
+	"path/filepath"
+	"strconv"
+	"strings"
 )
 
 
@@ -58,31 +59,38 @@ func searchLatestFile(str string) string {
 }
 
 func dropTheLine(pathOs string, str string, out os.FileInfo, arg bool) {
-	var as = "."
-	var newPath, size string
-	path := strings.Split(strings.ReplaceAll(str, pathOs+"\\",""), string(os.PathSeparator))
-	//fmt.Println(path, pathOs, str)
-	//dir, file := filepath.Split(str)
-	//if len(path) > 1 {
-	//	path = path[len(path)-1:]
-	//}
-
-	//fmt.Println("dir: ", dir, " file: ", file, " len: ", len(dir))
-	for i:=0; i<len(path)-1;i++ {
-		as = as + "\\" + path[i]
-		if path[i] == searchLatestFile(as) {
-			newPath = newPath + "\t"
-		} else {
-			newPath = newPath + " |\t"
+	var newPath string
+	pathSplit := strings.Split(strings.Replace(str, pathOs,"", -1), string(os.PathSeparator))
+	for er, rt := range pathSplit {
+		if pathOs == str {
+			fmt.Println("Directory tree:")
+			break
 		}
+		if er == len(pathSplit) -1 && searchLatestFile(str) == rt {
+			newPath += "└───" + out.Name()
+			break
+		} else if er == len(pathSplit) -1 && searchLatestFile(str) != rt {
+			newPath += "├───" + out.Name()
+			break
+		}
+		if searchLatestFile(pathOs) == rt {
+			newPath += "\t"
+		} else {
+			newPath += "|\t"
+		}
+		pathOs += rt + "\\"
 	}
-	test := searchLatestFile(str)
-	if out.Size() == 0 {
-		size = "(empty)"
-	} else {
-		size = fmt.Sprint("(", out.Size(), "b)")
+	switch {
+	case out.IsDir():
+	case out.Size() == 0:
+		newPath += " (empty)"
+	default:
+		newPath += " (" + strconv.Itoa(int(out.Size())) +"b)"
 	}
-	if arg {
+	fmt.Println(newPath)
+
+
+	/*if arg {
 		if test == path[len(path)-1] {
 			if out.IsDir() {
 				fmt.Println(newPath + " └───" + path[len(path)-1])
@@ -106,5 +114,5 @@ func dropTheLine(pathOs string, str string, out os.FileInfo, arg bool) {
 				fmt.Println(newPath + " ├───" + path[len(path)-1], size)
 			}
 		}
-	}
+	}*/
 }
