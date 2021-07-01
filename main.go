@@ -45,7 +45,7 @@ func dirTreee(out *os.File, path string, files bool) error {
 
 func searchLatestFile(str string, arg bool) string{
 	var num int
-	var nameFiles string
+	var nameFiles, lastFiles string
 	path := filepath.Dir(str)
 	files, err := os.ReadDir(path)
 	if err != nil {
@@ -58,11 +58,13 @@ func searchLatestFile(str string, arg bool) string{
 			nameFiles = file.Name()
 		}
 		if file.IsDir() && arg {
-			nameFiles = file.Name()
+			lastFiles = file.Name()
 			continue
 		}
 	}
-
+	if lastFiles != "" {
+		return lastFiles
+	}
 	return nameFiles
 }
 
