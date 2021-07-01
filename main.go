@@ -31,6 +31,9 @@ func dirTreee(out *os.File, path string, files bool) error {
 		if err != nil {
 			return err
 		}
+		if files && !out.IsDir() {
+			return nil
+		}
 		dropTheLine(path, path1, out, files)
 		return nil
 	})
@@ -40,7 +43,7 @@ func dirTreee(out *os.File, path string, files bool) error {
 	return nil
 }
 
-func searchLatestFile(str string) string {
+func searchLatestFile(str string, arg bool) string{
 	var num int
 	var nameFiles string
 	path := filepath.Dir(str)
@@ -54,7 +57,12 @@ func searchLatestFile(str string) string {
 		} else {
 			nameFiles = file.Name()
 		}
+		if file.IsDir() && arg {
+			nameFiles = file.Name()
+			continue
+		}
 	}
+
 	return nameFiles
 }
 
@@ -66,14 +74,14 @@ func dropTheLine(pathOs string, str string, out os.FileInfo, arg bool) {
 			fmt.Println("Directory tree:")
 			break
 		}
-		if er == len(pathSplit) -1 && searchLatestFile(str) == rt {
+		if er == len(pathSplit) -1 && searchLatestFile(str, arg) == rt {
 			newPath += "└───" + out.Name()
 			break
-		} else if er == len(pathSplit) -1 && searchLatestFile(str) != rt {
+		} else if er == len(pathSplit) -1 && searchLatestFile(str, arg) != rt {
 			newPath += "├───" + out.Name()
 			break
 		}
-		if searchLatestFile(pathOs) == rt {
+		if searchLatestFile(pathOs, arg) == rt {
 			newPath += "\t"
 		} else {
 			newPath += "|\t"
@@ -88,31 +96,4 @@ func dropTheLine(pathOs string, str string, out os.FileInfo, arg bool) {
 		newPath += " (" + strconv.Itoa(int(out.Size())) +"b)"
 	}
 	fmt.Println(newPath)
-
-
-	/*if arg {
-		if test == path[len(path)-1] {
-			if out.IsDir() {
-				fmt.Println(newPath + " └───" + path[len(path)-1])
-			}
-		} else {
-			if out.IsDir() {
-				fmt.Println(newPath + " ├───" + path[len(path)-1])
-			}
-		}
-	} else if !arg {
-		if test == path[len(path)-1] {
-			if out.IsDir() {
-				fmt.Println(newPath + " └───" + path[len(path)-1])
-			} else {
-				fmt.Println(newPath + " └───" + path[len(path)-1], size)
-			}
-		} else {
-			if out.IsDir() {
-				fmt.Println(newPath + " ├───" + path[len(path)-1])
-			} else {
-				fmt.Println(newPath + " ├───" + path[len(path)-1], size)
-			}
-		}
-	}*/
 }
